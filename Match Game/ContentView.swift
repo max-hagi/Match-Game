@@ -9,45 +9,84 @@ import SwiftUI
 
 struct ContentView: View {
     
-    var count = 1
+    @ObservedObject var viewModel: EmojiMatchGame
     
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
             
-            Text("Hello, world!")
+            Text("⭐️ Match Game ⭐️").font(.largeTitle)
             
             
-            for i in 1..<count {
-                PanelView()
+            ScrollView {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))]) {
+                    ForEach(viewModel.cards) {card in
+                        PanelView(card: card)
+                            .foregroundColor(.mint)
+                            .aspectRatio(2/3, contentMode: .fit)
+                            .onTapGesture {
+                                viewModel.select(card)
+                            }
+                    }
+                }
             }
+                
+            Spacer()
             
-        }
-        .padding()
-    }
-}
-
-
-
-
-struct PanelView: View{
-    var body: some View {
         
-        ZStack {
-            RoundedRectangle(cornerRadius: 20.0).foregroundColor(.cyan)
-            Text("Test").foregroundColor(.white)
+        
+            
+            
+            
+//            HStack {
+//                Spacer()
+//
+//                var currentTheme = "Vehicles"
+//
+//                Picker("Select a theme", selection: currentTheme){
+//
+//                    for theme in viewModel.themeKeys {
+//                        Text(theme.capitalized)
+//                    }
+//                }.pickerStyle(.automatic)
+//
+//                Spacer()
+//            }
+        }
+    }
+    
+    struct PanelView: View {
+        
+        var card: MatchGame<String>.Card
+        
+        let cardShape = RoundedRectangle(cornerRadius: 20.0)
+        
+        var body: some View {
+            ZStack {
+                
+                if card.isFlipped {
+                    cardShape.fill()
+                    Text("")
+                }
+                
+                else {
+                    cardShape.fill().foregroundColor(.white)
+                    cardShape.stroke(lineWidth: 3)
+                    Text(card.content).font(.largeTitle)
+                }
+                
+            }.padding()
+        }
+    }
+    
+    struct ContentView_Previews: PreviewProvider {
+        static var previews: some View {
+            
+            let game = EmojiMatchGame()
+            
+            ContentView(viewModel: game).preferredColorScheme(.light)
+            ContentView(viewModel: game).preferredColorScheme(.dark)
         }
     }
 }
 
 
-
-
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
