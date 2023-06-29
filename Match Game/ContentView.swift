@@ -9,72 +9,96 @@ import SwiftUI
 
 struct ContentView: View {
     
-    @ObservedObject var viewModel: EmojiMatchGame
+    @ObservedObject var game: EmojiMatchGame
     
     var body: some View {
-        VStack {
-            
-            Text("⭐️ Match Game ⭐️").font(.largeTitle)
-            
-            
-            ScrollView {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))]) {
-                    ForEach(viewModel.cards) {card in
-                        PanelView(card: card)
-                            .foregroundColor(.mint)
-                            .aspectRatio(2/3, contentMode: .fit)
-                            .onTapGesture {
-                                viewModel.select(card)
-                            }
+        
+        if game.gameStatus {
+            VStack {
+                Text("⭐️ Match Game ⭐️").font(.largeTitle)
+                
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))]) {
+                        ForEach(game.cards) { card in
+                            PanelView(card)
+                                .foregroundColor(.mint)
+                                .aspectRatio(2/3, contentMode: .fit)
+                                .onTapGesture {game.select(card)}
+                        }
                     }
                 }
-            }
                 
-            Spacer()
+                Spacer()
+                
+                // TODO
+                //            HStack {
+                //                Spacer()
+                //
+                //                var currentTheme = "Vehicles"
+                //
+                //                Picker("Select a theme", selection: currentTheme){
+                //
+                //                    for theme in viewModel.themeKeys {
+                //                        Text(theme.capitalized)
+                //                    }
+                //                }.pickerStyle(.automatic)
+                //
+                //                Spacer()
+                //            }
+            }
             
-        
-        
-            
-            
-            
-//            HStack {
-//                Spacer()
-//
-//                var currentTheme = "Vehicles"
-//
-//                Picker("Select a theme", selection: currentTheme){
-//
-//                    for theme in viewModel.themeKeys {
-//                        Text(theme.capitalized)
-//                    }
-//                }.pickerStyle(.automatic)
-//
-//                Spacer()
-//            }
+        }
+        else {
+            GameEndedView()
         }
     }
     
     struct PanelView: View {
-        
         var card: MatchGame<String>.Card
+        
+        init(_ card: MatchGame<String>.Card) {
+            self.card = card
+        }
         
         let cardShape = RoundedRectangle(cornerRadius: 20.0)
         
+        @Environment(\.colorScheme) var colorScheme
+        
         var body: some View {
             ZStack {
-                
-                if card.isFlipped {
+                if card.isFaceDown && !card.isMatched {
                     cardShape.fill()
                     Text("")
                 }
                 
                 else {
-                    cardShape.fill().foregroundColor(.white)
-                    cardShape.stroke(lineWidth: 3)
+                    // If card is matched
+                    if card.isMatched {
+                       cardShape.fill().foregroundColor(.green)
+                   }
+                    else {
+                        if colorScheme == .dark {
+                            cardShape.fill().foregroundColor(.white)
+                            cardShape.stroke(lineWidth: 3).foregroundColor(.mint)
+                        }
+                        else {
+                            cardShape.fill().foregroundColor(.mint).opacity(0.75)
+                            cardShape.stroke(lineWidth: 3).foregroundColor(.mint)
+                        }
+                    }
                     Text(card.content).font(.largeTitle)
                 }
                 
             }.padding()
+        }
+    }
+    
+    
+    struct GameEndedView: View {
+        var body: some View {
+            Text("You matched all the cards!").font(.largeTitle).padding(.horizontal)
+            
+//            Button(action: viewModel.gameStatus.toggle, label: Text("Play Again?"))
         }
     }
     
@@ -83,8 +107,8 @@ struct ContentView: View {
             
             let game = EmojiMatchGame()
             
-            ContentView(viewModel: game).preferredColorScheme(.light)
-            ContentView(viewModel: game).preferredColorScheme(.dark)
+            ContentView(game: game).preferredColorScheme(.light)
+            ContentView(game: game).preferredColorScheme(.dark)
         }
     }
 }

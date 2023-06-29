@@ -14,12 +14,9 @@ class EmojiMatchGame: ObservableObject {
          "animals": ["🐶", "🐱", "🐭", "🐰", "🦊", "🐻", "🐼", "🦁", "🐮", "🐷"],
          "fruit" : ["🍎", "🍋", "🍌", "🍉", "🍓", "🫐", "🍒", "🍑", "🍍", "🥥"]
      ]
-
-    // Returns the list of possible themes
-    var getKeys = emojiThemes.keys.sorted()
     
     static func createMatchGame() -> MatchGame<String> {
-        MatchGame(numberCardPairs: 5) {index in emojiThemes[emojiThemes.keys.sorted()[0]]![index]}
+        MatchGame(numberCardPairs: 5, themes: emojiThemes.keys.sorted()) {index in emojiThemes[emojiThemes.keys.sorted()[0]]![index]}
 
     }
 
@@ -27,9 +24,14 @@ class EmojiMatchGame: ObservableObject {
     
     @Published private var model: MatchGame<String> = createMatchGame()
     
+    
     // Shows possible card options
     var cards: Array<MatchGame<String>.Card> {
         return model.cards
+    }
+    
+    var gameStatus: Bool {
+        return model.gameInProgress
     }
 
     
